@@ -31,9 +31,11 @@ def train_epoch(model, dataloader, optimizer, criterion, epoch, writer, device=N
         loss = criterion(y_pred, y)
         if i % 100 == 0:
             print(f"epoch {epoch} | iterate {i} / {len(dataloader)} | {loss.item()}")
+
         writer.add_scalar('Loss/train', loss.item(), epoch * len(dataloader) + i)
         loss.backward()
         optimizer.step()
+
     return cells
 
 
@@ -103,7 +105,7 @@ if __name__ == "__main__":
     train_dataset = CellCropsDataset(train_crops, transform=training_transform, mask=True)
     val_dataset = CellCropsDataset(val_crops, transform=val_transform(crop_input_size), mask=True)
     train_dataset_for_eval = CellCropsDataset(train_crops, transform=val_transform(crop_input_size), mask=True)
-    device = "cuda"
+    device = "cuda" if torch.cuda.is_available() else "cpu"
     num_channels = sum(1 for line in open(config["channels_path"])) + 1 - len(config["blacklist"])
     class_num = config["num_classes"]
 
@@ -120,13 +122,15 @@ if __name__ == "__main__":
     train_loader_for_eval = DataLoader(train_dataset_for_eval, batch_size=128,
                                        num_workers=8, shuffle=False)
     val_loader = DataLoader(val_dataset, batch_size=128,
-                            num_workers=10, shuffle=False)
+                            num_workers=8, shuffle=False)
+
+    print(f'Training on {device}')
     print(len(train_loader), len(val_loader))
     for i in range(config["epoch_max"]):
         train_epoch(model, train_loader, optimizer, criterion, device=device, epoch=i, writer=writer)
         print(f"Epoch {i} done!")
-        torch.save(model.state_dict(), os.path.join(args.base_path, f"./weights_{i}_count.pth"))
         if (i % 10 == 0) & (i > 0):
+            torch.save(model.state_dict(), os.path.join(args.base_path, f"./weights_{i}_count.pth"))
             cells_val, results_val = val_epoch(model, val_loader, device=device)
             metrics = Metrics([],
                               writer,

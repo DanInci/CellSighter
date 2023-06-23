@@ -41,6 +41,12 @@ def load_data(fname) -> np.ndarray:
         image = np.load(fname, allow_pickle=True)['data']
     elif fname.endswith(".tif") or fname.endswith(".tiff"):
         image = io.imread(fname)
+        ## ADDED: dimensions are read as (40,600,600) -> reshaping to (600,600,40)
+        if image.ndim == 3:
+            image = np.moveaxis(image,0,-1)
+            if image.shape[0] < image.shape[-1] or image.shape[1] < image.shape[-1]:
+                raise TypeError
+
     return image
 
 

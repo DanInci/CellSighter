@@ -58,7 +58,7 @@ if __name__ == "__main__":
                             blacklist_channels=config["blacklist"])
     crop_input_size = config["crop_input_size"] if "crop_input_size" in config else 100
     val_dataset = CellCropsDataset(val_crops, transform=val_transform(crop_input_size), mask=True)
-    device = "cuda"
+    device = "cuda" if torch.cuda.is_available() else "cpu"
     num_channels = sum(1 for line in open(config["channels_path"])) + 1 - len(config["blacklist"])
     class_num = config["num_classes"]
 
@@ -67,8 +67,9 @@ if __name__ == "__main__":
     model.load_state_dict(torch.load(eval_weights))
     model = model.to(device=device)
 
+    print(f'Evaluating on {device}')
     val_loader = DataLoader(val_dataset, batch_size=128,
-                            num_workers=10, shuffle=False, pin_memory=True)
+                            num_workers=8, shuffle=False, pin_memory=True)
     cells, results = val_epoch(model, val_loader, device=device)
 
     metrics = Metrics(
