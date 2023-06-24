@@ -126,10 +126,11 @@ if __name__ == "__main__":
 
     print(f'Training on {device}')
     print(len(train_loader), len(val_loader))
-    for i in range(config["epoch_max"]):
+    epochs = config["epoch_max"]
+    for i in range(epochs):
         train_epoch(model, train_loader, optimizer, criterion, device=device, epoch=i, writer=writer)
         print(f"Epoch {i} done!")
-        if (i % 10 == 0) & (i > 0):
+        if ((i % 10 == 0) | (i == epochs-1)) & (i > 0):
             torch.save(model.state_dict(), os.path.join(args.base_path, f"./weights_{i}_count.pth"))
             cells_val, results_val = val_epoch(model, val_loader, device=device)
             metrics = Metrics([],
