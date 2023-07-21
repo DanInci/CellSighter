@@ -77,6 +77,7 @@ def define_sampler(crops, hierarchy_match=None):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Arguments')
     parser.add_argument('--base_path', type=str,
+                        required=True,
                         help='configuration_path')
     args = parser.parse_args()
 
