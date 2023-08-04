@@ -184,3 +184,10 @@ def load_crops(root_dir,
                              channels=channels)
 
     return train_crops, val_crops
+
+
+def is_nested(input_list):
+    for element in input_list:
+        if isinstance(element, list):
+            return True
+    return False

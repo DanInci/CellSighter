@@ -72,9 +72,7 @@ if __name__ == "__main__":
                             num_workers=8, shuffle=False, pin_memory=True)
     cells, results = val_epoch(model, val_loader, device=device)
 
-    metrics = Metrics(
-        [],
-        writer,
-        prefix="val")
+    metrics = Metrics([], writer, prefix="val")
     metrics(cells, results, 0)
-    metrics.save_results(os.path.join(args.base_path, f"val_results.csv"), cells, results)
+    results_df = metrics.get_results(cells, results)
+    results_df.to_csv(os.path.join(args.base_path, f"val_results.csv"))

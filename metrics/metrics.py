@@ -37,13 +37,15 @@ class Metrics:
         for m in self.metrics:
             np.save(f"{m.__class__.__name__}", m(cells_crop, pred_prob, self.tb, epoch, self.prefix))
 
-    def save_results(self, path, cells_crop, pred_prob):
+    def get_results(self, cells_crop, pred_prob):
         cells_crop = self.preprocess_cells(cells_crop)
         cells_crop = pd.DataFrame(cells_crop)
         cells_crop["pred"] = pred_prob.argmax(1)
         cells_crop["pred_prob"] = pred_prob.max(1)
         cells_crop["prob_list"] = pred_prob.tolist()
-        cells_crop[["pred", "pred_prob", "label", "cell_id", "image_id", "prob_list"]].to_csv(path)
+        results = cells_crop[["pred", "pred_prob", "label", "cell_id", "image_id", "prob_list"]]
+
+        return results
 
 
 class ConfusionMatrixMetric:
